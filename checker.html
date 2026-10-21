@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Wallet Checker</title>
+
+    <style>
+        :root {
+            --bg: #0f0817;
+            --bg2: #1c0f2b;
+            --panel: #190d27;
+            --line: #4a2d6b;
+            --text: #f4ead8;
+            --muted: #b09cc8;
+            --orange: #ff7a1a;
+            --green: #74e03c;
+            --purple: #a98bff;
+            --bad: #ff6b57;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background:
+                radial-gradient(ellipse at top, var(--bg2), var(--bg) 70%);
+            color: var(--text);
+            font-family: Georgia, serif;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 560px;
+            padding: 32px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            box-shadow: 0 0 35px rgba(169, 139, 255, 0.12);
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 0;
+            color: var(--orange);
+            font-size: clamp(28px, 6vw, 40px);
+        }
+
+        p {
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            margin: 16px 0;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        input:focus {
+            border-color: var(--orange);
+            box-shadow: 0 0 0 2px rgba(255, 122, 26, 0.15);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px 20px;
+            background: var(--orange);
+            color: var(--bg);
+            border: 2px solid var(--orange);
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        button:hover {
+            background: transparent;
+            color: var(--orange);
+        }
+
+        #result {
+            margin-top: 22px;
+            padding: 14px;
+            border-radius: 8px;
+            overflow-wrap: anywhere;
+            line-height: 1.6;
+        }
+
+        a {
+            color: var(--orange);
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 14px;
+            }
+
+            .container {
+                padding: 24px 18px;
+            }
+        }
+
+        /* Flying bats in the background */
+        .bats {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bats span {
+            position: absolute;
+            left: -60px;
+            top: 15%;
+            font-size: 25px;
+            opacity: 0.65;
+            animation: batFly 16s linear infinite;
+        }
+
+        .bats span:nth-child(2) {
+            top: 30%;
+            font-size: 18px;
+            animation-duration: 21s;
+            animation-delay: -7s;
+        }
+
+        .bats span:nth-child(3) {
+            top: 48%;
+            font-size: 30px;
+            animation-duration: 19s;
+            animation-delay: -12s;
+        }
+
+        .bats span:nth-child(4) {
+            top: 68%;
+            font-size: 20px;
+            animation-duration: 24s;
+            animation-delay: -4s;
+        }
+
+        .bats span:nth-child(5) {
+            top: 82%;
+            font-size: 26px;
+            animation-duration: 22s;
+            animation-delay: -15s;
+        }
+
+        @keyframes batFly {
+            0% {
+                transform: translateX(-60px) translateY(0) scaleX(1);
+            }
+
+            45% {
+                transform: translateX(50vw) translateY(-25px) scaleX(1);
+            }
+
+            50% {
+                transform: translateX(55vw) translateY(-20px) scaleX(-1);
+            }
+
+            95% {
+                transform: translateX(105vw) translateY(15px) scaleX(-1);
+            }
+
+            100% {
+                transform: translateX(110vw) translateY(0) scaleX(1);
+            }
+        }
+
+        /* Keep the checker above the background animation */
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .bottom-web {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: left;
+            margin: 22px auto 0;
+            opacity: 0.8;
+        }
+
+        .bottom-web svg {
+            max-width: 45vw;
+            height: auto;
+            filter: drop-shadow(0 0 7px rgba(169, 139, 255, 0.2));
+        }
+
+        /* Center the checker on the page */
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Keep the checker centered */
+        .container {
+            width: 100%;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        /* Center the web underneath the checker */
+        .bottom-web {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 22px auto 0;
+        }
+
+        /* Keep the web centered */
+        .bottom-web svg {
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Flushies spooky pop-up */
+        .spooky-popup {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(8, 3, 14, 0.82);
+            backdrop-filter: blur(5px);
+        }
+
+        .spooky-popup.hidden {
+            display: none;
+        }
+
+        .spooky-box {
+            width: 100%;
+            max-width: 380px;
+            padding: 30px 24px;
+            text-align: center;
+            background: #190d27;
+            border: 1px solid #ff7a1a;
+            border-radius: 14px;
+            box-shadow: 0 0 35px rgba(255, 122, 26, 0.22);
+            animation: spookyAppear 0.3s ease-out;
+        }
+
+        .spooky-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .spooky-box h2 {
+            margin: 0 0 12px;
+            color: #ff7a1a;
+            font-size: 27px;
+        }
+
+        .spooky-box p {
+            color: #f4ead8;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .spooky-box button {
+            margin-top: 14px;
+        }
+
+        .spooky-box.success {
+            border-color: #74e03c;
+            box-shadow: 0 0 35px rgba(116, 224, 60, 0.18);
+        }
+
+        .spooky-box.success h2 {
+            color: #74e03c;
+        }
+
+        .spooky-box.failure {
+            border-color: #ff6b57;
+            box-shadow: 0 0 35px rgba(255, 107, 87, 0.18);
+        }
+
+        .spooky-box.failure h2 {
+            color: #ff6b57;
+        }
+
+        @keyframes spookyAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.85) translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+
+        .crypt-icon {
+            font-size: 48px;
+            margin: 0 auto 12px;
+            text-align: center;
+            width: 100%;
+            filter: drop-shadow(0 0 12px #ff7a1a);
+        }
+
+
+        .crypt-label {
+            color: #a98bff;
+            font-size: 11px;
+            letter-spacing: 3px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .checker h1 span {
+            color: #ff7a1a;
+            text-align: center;
+
+        }
+
+        .checker h1 {
+            margin-top: 0;
+            text-align: center;
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+    <div class="bats" aria-hidden="true">
+        <span>🦇</span>
+        <span>🦇</span>
+        <span>🦇</span>
+        <span>🦇</span>
+        <span>🦇</span>
+    </div>
+
+
+
+
+    <div class="checker">
+
+        <div class="crypt-icon">🎃</div>
+
+        <p class="crypt-label">FLUSHIES · WHITELIST PORTAL</p>
+
+        <h1>Enter the <span>Crypt</span></h1>
+
+        <p style="text-align: center;">
+            Dare to discover your fate.<br>
+            Check if your wallet made the list.
+        </p>
+
+        <input type="text" id="wallet" placeholder="0x..." autocomplete="off">
+
+        <button onclick="checkWallet()">
+            CHECK WALLET
+        </button>
+
+        <div id="result"></div>
+
+    </div>
+
+
+    <div id="result"></div>
+
+    </div>
+
+
+
+    <script>
+        const CHECKER_URL =
+            'https://script.google.com/macros/s/AKfycbyTYfRg8D6AogponLhJGdqWHm3CKPoS4O_uJkVy6Y-pDaG5tqMCysI2lW9jshn4UsI6Eg/exec';
+
+        function showSpookyPopup(icon, title, message, type = '') {
+            const popup = document.getElementById('spookyPopup');
+            const box = document.getElementById('spookyBox');
+
+            document.getElementById('spookyIcon').textContent = icon;
+            document.getElementById('spookyTitle').textContent = title;
+            document.getElementById('spookyMessage').textContent = message;
+
+            box.className = 'spooky-box';
+            if (type) box.classList.add(type);
+
+            popup.classList.remove('hidden');
+        }
+
+        function closeSpookyPopup() {
+            document.getElementById('spookyPopup').classList.add('hidden');
+        }
+
+        // Close the pop-up by clicking outside it or pressing Escape.
+        document.getElementById('spookyPopup').addEventListener('click', function (event) {
+            if (event.target === this) closeSpookyPopup();
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') closeSpookyPopup();
+        });
+
+        async function checkWallet() {
+            const walletInput = document.getElementById('wallet');
+            const result = document.getElementById('result');
+            const wallet = walletInput.value.trim().toLowerCase();
+
+            // Empty input
+            if (!wallet) {
+                showSpookyPopup(
+                    '🎃',
+                    'The Crypt Awaits!',
+                    'Paste your wallet address first, brave soul.',
+                    ''
+                );
+                walletInput.focus();
+                return;
+            }
+
+            // Invalid wallet format
+            if (!/^0x[a-f0-9]{40}$/.test(wallet)) {
+                showSpookyPopup(
+                    '🦇',
+                    'That Wallet Looks Cursed!',
+                    'Enter a valid wallet address before entering the crypt.',
+                    'failure'
+                );
+                walletInput.focus();
+                return;
+            }
+
+            result.textContent = '🕯️ The spirits are checking your wallet...';
+
+            try {
+                const response = await fetch(
+                    CHECKER_URL + '?wallet=' + encodeURIComponent(wallet)
+                );
+
+                if (!response.ok) {
+                    throw new Error('The eligibility server returned an error.');
+                }
+
+                const data = await response.json();
+
+                if (data.eligible === true) {
+                    result.textContent = '🎃 The crypt has spoken!';
+                    showSpookyPopup(
+                        '💚',
+                        'You’re on the List!',
+                        'The crypt welcomes you. This wallet is eligible!',
+                        'success'
+                    );
+                } else if (data.eligible === false) {
+                    result.textContent = '👻 The crypt has spoken!';
+                    showSpookyPopup(
+                        '😔',
+                        'No Whitelist Magic!',
+                        'This wallet isn’t eligible. The crypt has not called your name... yet.',
+                        'failure'
+                    );
+                } else {
+                    throw new Error('Unexpected eligibility response.');
+                }
+
+            } catch (error) {
+                console.error(error);
+                result.textContent = 'The spirits are unavailable.';
+                showSpookyPopup(
+                    '🕸️',
+                    'The Crypt Is Disturbed!',
+                    'We couldn’t check your wallet right now. Please try again shortly.',
+                    'failure'
+                );
+            }
+        }
+    </script>
+
+
+    <div class="bottom-web" aria-hidden="true">
+        <svg viewBox="0 0 180 150" width="180" xmlns="http://www.w3.org/2000/svg">
+            <g fill="none" stroke="#a98bff" stroke-width="1.4" opacity="0.75">
+                <path
+                    d="M180 0 L0 150 M180 35 L40 150 M180 70 L85 150 M180 105 L130 150 M145 0 L180 35 M110 0 L180 70 M75 0 L180 105 M40 0 L180 140" />
+                <path d="M150 0 Q145 30 180 35 M115 0 Q110 45 180 70 M80 0 Q75 65 180 105 M45 0 Q40 90 180 140" />
+            </g>
+        </svg>
+    </div>
+
+    <div class="spooky-popup hidden" id="spookyPopup" role="dialog" aria-modal="true" aria-labelledby="spookyTitle">
+        <div class="spooky-box" id="spookyBox">
+            <div class="spooky-icon" id="spookyIcon">🎃</div>
+            <h2 id="spookyTitle">The Crypt Awaits</h2>
+            <p id="spookyMessage"></p>
+            <button type="button" onclick="closeSpookyPopup()">Got it 💀 </button>
+        </div>
+    </div>
+
+
+
+</body>
+
+</html>
